@@ -4092,6 +4092,62 @@
       fetchpriority="low"
       src="https://framerusercontent.com/sites/2exwqqjoxCLKLpDjyu7Lcp/script_main.NSYFPY4E.mjs"
     ></script>
+    <script>
+      // Efficient script to remove "Get this template for FREE" links
+      (function() {
+        // Function to efficiently find and remove template links
+        function removeTemplateLinks() {
+          // Use a specific CSS selector to directly target strong elements
+          // This is faster than querying all strong elements and then filtering
+          const xpath = "//strong[contains(text(), 'Get this template for FREE')]";
+          const matchingElements = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+          
+          // If we found any elements, process them
+          if (matchingElements.snapshotLength > 0) {
+            for (let i = 0; i < matchingElements.snapshotLength; i++) {
+              const strongElement = matchingElements.snapshotItem(i);
+              // Find nearest parent <a> tag
+              let parent = strongElement.parentElement;
+              while (parent && parent.tagName !== 'A') {
+                parent = parent.parentElement;
+              }
+              
+              // Remove the link if found
+              if (parent && parent.tagName === 'A') {
+                parent.parentNode.removeChild(parent);
+              }
+            }
+          }
+        }
+
+        // Execute on DOM content loaded
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', removeTemplateLinks);
+        } else {
+          // If DOM is already loaded, run immediately
+          removeTemplateLinks();
+        }
+
+        // Set up a lighter weight MutationObserver that only watches for added nodes
+        // This is more efficient than watching for all mutations
+        const observer = new MutationObserver(mutations => {
+          for (const mutation of mutations) {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+              removeTemplateLinks();
+              break; // Only need to run once per batch of mutations
+            }
+          }
+        });
+
+        // Start observing with a configuration that minimizes performance impact
+        observer.observe(document.body, { 
+          childList: true, 
+          subtree: true,
+          characterData: false,
+          attributeFilter: [] // Don't watch attributes
+        });
+      })();
+    </script>
     <div
       id="svg-templates"
       style="position: absolute; overflow: hidden; bottom: 0; left: 0; width: 0; height: 0; z-index: 0; contain: strict"
